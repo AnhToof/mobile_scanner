@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -47,6 +48,8 @@ class MobileScanner extends StatefulWidget {
 class _MobileScannerState extends State<MobileScanner>
     with WidgetsBindingObserver {
   late MobileScannerController controller;
+  final bool Function(Uint8List? list1, Uint8List? list2) _equality =
+      const ListEquality().equals;
 
   @override
   void initState() {
@@ -84,7 +87,7 @@ class _MobileScannerState extends State<MobileScanner>
         } else {
           controller.barcodes.listen((barcode) {
             if (!widget.allowDuplicates) {
-              if (lastScanned != barcode.rawBytes) {
+              if (!_equality(lastScanned, barcode.rawBytes)) {
                 lastScanned = barcode.rawBytes;
                 widget.onDetect(barcode, value! as MobileScannerArguments);
               }
