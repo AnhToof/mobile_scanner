@@ -54,7 +54,7 @@ BarcodeFormat toFormat(int value) {
 
 CalendarEvent? toCalendarEvent(Map? data) {
   if (data != null) {
-    return CalendarEvent.fromNative(data);
+    return CalendarEvent().fromNative(data);
   } else {
     return null;
   }
@@ -78,7 +78,7 @@ DateTime? toDateTime(Map<String, dynamic>? data) {
 
 ContactInfo? toContactInfo(Map? data) {
   if (data != null) {
-    return ContactInfo.fromNative(data);
+    return ContactInfo().fromNative(data);
   } else {
     return null;
   }
@@ -86,7 +86,7 @@ ContactInfo? toContactInfo(Map? data) {
 
 PersonName? toName(Map? data) {
   if (data != null) {
-    return PersonName.fromNative(data);
+    return PersonName().fromNative(data);
   } else {
     return null;
   }
@@ -94,7 +94,7 @@ PersonName? toName(Map? data) {
 
 DriverLicense? toDriverLicense(Map? data) {
   if (data != null) {
-    return DriverLicense.fromNative(data);
+    return DriverLicense().fromNative(data);
   } else {
     return null;
   }
@@ -102,7 +102,7 @@ DriverLicense? toDriverLicense(Map? data) {
 
 Email? toEmail(Map? data) {
   if (data != null) {
-    return Email.fromNative(data);
+    return Email().fromNative(data);
   } else {
     return null;
   }
@@ -110,7 +110,7 @@ Email? toEmail(Map? data) {
 
 GeoPoint? toGeoPoint(Map? data) {
   if (data != null) {
-    return GeoPoint.fromNative(data);
+    return GeoPoint().fromNative(data);
   } else {
     return null;
   }
@@ -118,7 +118,7 @@ GeoPoint? toGeoPoint(Map? data) {
 
 Phone? toPhone(Map? data) {
   if (data != null) {
-    return Phone.fromNative(data);
+    return Phone().fromNative(data);
   } else {
     return null;
   }
@@ -126,7 +126,7 @@ Phone? toPhone(Map? data) {
 
 SMS? toSMS(Map? data) {
   if (data != null) {
-    return SMS.fromNative(data);
+    return SMS().fromNative(data);
   } else {
     return null;
   }
@@ -134,7 +134,7 @@ SMS? toSMS(Map? data) {
 
 UrlBookmark? toUrl(Map? data) {
   if (data != null) {
-    return UrlBookmark.fromNative(data);
+    return UrlBookmark().fromNative(data);
   } else {
     return null;
   }
@@ -142,7 +142,7 @@ UrlBookmark? toUrl(Map? data) {
 
 WiFi? toWiFi(Map? data) {
   if (data != null) {
-    return WiFi.fromNative(data);
+    return WiFi().fromNative(data);
   } else {
     return null;
   }

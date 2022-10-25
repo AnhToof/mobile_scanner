@@ -45,6 +45,7 @@ class MobileScannerController {
   late final ValueNotifier<CameraFacing> cameraFacingState;
   final Ratio? ratio;
   final bool? torchEnabled;
+
   // Whether to return the image buffer with the Barcode event
   final bool returnImage;
 
@@ -100,23 +101,20 @@ class MobileScannerController {
         break;
       case 'barcode':
         final image = returnImage ? event['image'] as Uint8List : null;
-        final barcode = Barcode.fromNative(data as Map? ?? {}, image);
+        final barcode = Barcode().fromNative(data as Map? ?? {}, image);
         barcodesController.add(barcode);
         break;
       case 'barcodeMac':
         barcodesController.add(
-          Barcode(
-            rawValue: (data as Map)['payload'] as String?,
-          ),
+          Barcode()..rawValue = (data as Map)['payload'] as String?,
         );
         break;
       case 'barcodeWeb':
         final bytes = (binaryData as List).cast<int>();
         barcodesController.add(
-          Barcode(
-            rawValue: data as String?,
-            rawBytes: Uint8List.fromList(bytes),
-          ),
+          Barcode()
+            ..rawValue = data as String?
+            ..rawBytes = Uint8List.fromList(bytes),
         );
         break;
       default:

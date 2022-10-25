@@ -1,36 +1,34 @@
 import 'dart:typed_data';
-import 'dart:ui';
 
+import 'package:hive/hive.dart';
 import 'package:mobile_scanner/src/objects/barcode_utility.dart';
 
 /// Represents a single recognized barcode and its value.
+@HiveType(typeId: 0)
 class Barcode {
-  /// Returns four corner points in clockwise direction starting with top-left.
-  ///
-  /// Due to the possible perspective distortions, this is not necessarily a rectangle.
-  ///
-  /// Returns null if the corner points can not be determined.
-  final List<Offset>? corners;
-
   /// Returns raw bytes of the image buffer
   ///
   /// Returns null if the image was not returned
-  final Uint8List? image;
+  @HiveField(0)
+  Uint8List? image;
 
   /// Returns barcode format
-  final BarcodeFormat format;
+  @HiveField(1, defaultValue: BarcodeFormat.ean13)
+  BarcodeFormat? format;
 
   /// Returns raw bytes as it was encoded in the barcode.
   ///
   /// Returns null if the raw bytes can not be determined.
-  final Uint8List? rawBytes;
+  @HiveField(2)
+  Uint8List? rawBytes;
 
   /// Returns barcode value as it was encoded in the barcode. Structured values are not parsed, for example: 'MEBKM:TITLE:Google;URL://www.google.com;;'.
   ///
   /// It's only available when the barcode is encoded in the UTF-8 format, and for non-UTF8 ones use [rawBytes] instead.
   ///
   /// Returns null if the raw value can not be determined.
-  final String? rawValue;
+  @HiveField(3)
+  String? rawValue;
 
   /// Returns barcode value in a user-friendly format.
   ///
@@ -39,7 +37,8 @@ class Barcode {
   /// This value may be multiline, for example, when line breaks are encoded into the original TEXT barcode value. May include the supplement value.
   ///
   /// Returns null if nothing found.
-  final String? displayValue;
+  @HiveField(4)
+  String? displayValue;
 
   /// Returns format type of the barcode value.
   ///
@@ -48,533 +47,625 @@ class Barcode {
   /// If the value structure cannot be parsed, TYPE_TEXT will be returned. If the recognized structure type is not defined in your current version of SDK, TYPE_UNKNOWN will be returned.
   ///
   /// Note that the built-in parsers only recognize a few popular value structures. For your specific use case, you might want to directly consume rawValue and implement your own parsing logic.
-  final BarcodeType type;
+  @HiveField(5, defaultValue: BarcodeType.text)
+  BarcodeType? type;
 
   /// Gets parsed calendar event details.
-  final CalendarEvent? calendarEvent;
+  @HiveField(6)
+  CalendarEvent? calendarEvent;
 
   /// Gets parsed contact details.
-  final ContactInfo? contactInfo;
+  @HiveField(7)
+  ContactInfo? contactInfo;
 
   /// Gets parsed driver license details.
-  final DriverLicense? driverLicense;
+  @HiveField(8)
+  DriverLicense? driverLicense;
 
   /// Gets parsed email details.
-  final Email? email;
+  @HiveField(9)
+  Email? email;
 
   /// Gets parsed geo coordinates.
-  final GeoPoint? geoPoint;
+  @HiveField(10)
+  GeoPoint? geoPoint;
 
   /// Gets parsed phone number details.
-  final Phone? phone;
+  @HiveField(11)
+  Phone? phone;
 
   /// Gets parsed SMS details.
-  final SMS? sms;
+  @HiveField(12)
+  SMS? sms;
 
   /// Gets parsed URL bookmark details.
-  final UrlBookmark? url;
+  @HiveField(13)
+  UrlBookmark? url;
 
   /// Gets parsed WiFi AP details.
-  final WiFi? wifi;
+  @HiveField(14)
+  WiFi? wifi;
+}
 
-  Barcode({
-    this.corners,
-    this.image,
-    this.format = BarcodeFormat.ean13,
-    this.rawBytes,
-    this.type = BarcodeType.text,
-    this.calendarEvent,
-    this.contactInfo,
-    this.driverLicense,
-    this.email,
-    this.geoPoint,
-    this.phone,
-    this.sms,
-    this.url,
-    this.wifi,
-    this.displayValue,
-    required this.rawValue,
-  });
-
-  /// Create a [Barcode] from native data.
-  Barcode.fromNative(Map data, this.image)
-      : corners = toCorners(data['corners'] as List?),
-        format = toFormat(data['format'] as int),
-        rawBytes = data['rawBytes'] as Uint8List?,
-        rawValue = data['rawValue'] as String?,
-        displayValue = data['displayValue'] as String?,
-        type = BarcodeType.values[data['type'] as int],
-        calendarEvent = toCalendarEvent(data['calendarEvent'] as Map?),
-        contactInfo = toContactInfo(data['contactInfo'] as Map?),
-        driverLicense = toDriverLicense(data['driverLicense'] as Map?),
-        email = toEmail(data['email'] as Map?),
-        geoPoint = toGeoPoint(data['geoPoint'] as Map?),
-        phone = toPhone(data['phone'] as Map?),
-        sms = toSMS(data['sms'] as Map?),
-        url = toUrl(data['url'] as Map?),
-        wifi = toWiFi(data['wifi'] as Map?);
+extension BarcodeExtension on Barcode {
+  Barcode fromNative(Map data, Uint8List? image) => Barcode()
+    ..image = image
+    ..format = toFormat(data['format'] as int)
+    ..rawBytes = data['rawBytes'] as Uint8List?
+    ..rawValue = data['rawValue'] as String?
+    ..displayValue = data['displayValue'] as String?
+    ..type = BarcodeType.values[data['type'] as int]
+    ..calendarEvent = toCalendarEvent(data['calendarEvent'] as Map?)
+    ..contactInfo = toContactInfo(data['contactInfo'] as Map?)
+    ..driverLicense = toDriverLicense(data['driverLicense'] as Map?)
+    ..email = toEmail(data['email'] as Map?)
+    ..geoPoint = toGeoPoint(data['geoPoint'] as Map?)
+    ..phone = toPhone(data['phone'] as Map?)
+    ..sms = toSMS(data['sms'] as Map?)
+    ..url = toUrl(data['url'] as Map?)
+    ..wifi = toWiFi(data['wifi'] as Map?);
 }
 
 /// A calendar event extracted from QRCode.
+@HiveType(typeId: 1)
 class CalendarEvent {
   /// Gets the description of the calendar event.
   ///
   /// Returns null if not available.
-  final String? description;
+  @HiveField(0)
+  String? description;
 
   /// Gets the start date time of the calendar event.
   ///
   /// Returns null if not available.
-  final DateTime? start;
+  @HiveField(1)
+  DateTime? start;
 
   /// Gets the end date time of the calendar event.
   ///
   /// Returns null if not available.
-  final DateTime? end;
+  @HiveField(2)
+  DateTime? end;
 
   /// Gets the location of the calendar event.
   ///
   /// Returns null if not available.
-  final String? location;
+  @HiveField(3)
+  String? location;
 
   /// Gets the organizer of the calendar event.
   ///
   /// Returns null if not available.
-  final String? organizer;
+  @HiveField(4)
+  String? organizer;
 
   /// Gets the status of the calendar event.
   ///
   /// Returns null if not available.
-  final String? status;
+  @HiveField(5)
+  String? status;
 
   /// Gets the summary of the calendar event.
   ///
   /// Returns null if not available.
-  final String? summary;
+  @HiveField(6)
+  String? summary;
+}
 
+extension CalendarEventExtension on CalendarEvent {
   /// Create a [CalendarEvent] from native data.
-  CalendarEvent.fromNative(Map data)
-      : description = data['description'] as String?,
-        start = data['start'] != null
-            ? DateTime.tryParse(data['start'] as String)
-            : null,
-        end = data['end'] != null
-            ? DateTime.tryParse(data['end'] as String)
-            : null,
-        location = data['location'] as String?,
-        organizer = data['organizer'] as String?,
-        status = data['status'] as String?,
-        summary = data['summary'] as String?;
+  CalendarEvent fromNative(Map data) => CalendarEvent()
+    ..description = data['description'] as String?
+    ..start = data['start'] != null
+        ? DateTime.tryParse(data['start'] as String)
+        : null
+    ..end =
+        data['end'] != null ? DateTime.tryParse(data['end'] as String) : null
+    ..location = data['location'] as String?
+    ..organizer = data['organizer'] as String?
+    ..status = data['status'] as String?
+    ..summary = data['summary'] as String?;
 }
 
 /// A person's or organization's business card. For example a VCARD.
+@HiveType(typeId: 2)
 class ContactInfo {
   /// Gets contact person's addresses.
   ///
   /// Returns an empty list if nothing found.
-  final List<Address> addresses;
+  @HiveField(0)
+  List<Address> addresses = [];
 
   /// Gets contact person's emails.
   ///
   /// Returns an empty list if nothing found.
-  final List<Email> emails;
+  @HiveField(1)
+  List<Email> emails = [];
 
   /// Gets contact person's name.
   ///
   /// Returns null if not available.
-  final PersonName? name;
+  @HiveField(2)
+  PersonName? name;
 
   /// Gets contact person's organization.
   ///
   /// Returns null if not available.
-  final String? organization;
+  @HiveField(3)
+  String? organization;
 
   /// Gets contact person's phones.
   ///
   /// Returns an empty list if nothing found.
-  final List<Phone>? phones;
+  @HiveField(4)
+  List<Phone>? phones;
 
   /// Gets contact person's title.
   ///
   /// Returns null if not available.
-  final String? title;
+  @HiveField(5)
+  String? title;
 
   /// Gets contact person's urls.
   ///
   /// Returns an empty list if nothing found.
-  final List<String>? urls;
+  @HiveField(6)
+  List<String>? urls;
+}
 
+extension ContactInfoExtension on ContactInfo {
   /// Create a [ContactInfo] from native data.
-  ContactInfo.fromNative(Map data)
-      : addresses = List.unmodifiable(
-          (data['addresses'] as List).map((e) => Address.fromNative(e as Map)),
-        ),
-        emails = List.unmodifiable(
-          (data['emails'] as List).map((e) => Email.fromNative(e as Map)),
-        ),
-        name = toName(data['name'] as Map?),
-        organization = data['organization'] as String?,
-        phones = List.unmodifiable(
-          (data['phones'] as List).map((e) => Phone.fromNative(e as Map)),
-        ),
-        title = data['title'] as String?,
-        urls = List.unmodifiable(data['urls'] as List);
+  ContactInfo fromNative(Map data) => ContactInfo()
+    ..addresses = List.unmodifiable(
+      (data['addresses'] as List).map((e) => Address().fromNative(e as Map)),
+    )
+    ..emails = List.unmodifiable(
+      (data['emails'] as List).map((e) => Email().fromNative(e as Map)),
+    )
+    ..name = toName(data['name'] as Map?)
+    ..organization = data['organization'] as String?
+    ..phones = List.unmodifiable(
+      (data['phones'] as List).map((e) => Phone().fromNative(e as Map)),
+    )
+    ..title = data['title'] as String?
+    ..urls = List.unmodifiable(data['urls'] as List);
 }
 
 /// An address.
+@HiveType(typeId: 3)
 class Address {
   /// Gets formatted address, multiple lines when appropriate. This field always contains at least one line.
-  final List<String> addressLines;
+  @HiveField(0, defaultValue: [])
+  List<String> addressLines = [];
 
   /// Gets type of the address.
   ///
   /// Returns null if not available.
-  final AddressType? type;
+  @HiveField(1)
+  AddressType? type;
+}
 
+extension AddressExtension on Address {
   /// Create a [Address] from native data.
-  Address.fromNative(Map data)
-      : addressLines = List.unmodifiable(data['addressLines'] as List),
-        type = AddressType.values[data['type'] as int];
+  Address fromNative(Map data) => Address()
+    ..addressLines = List.unmodifiable(data['addressLines'] as List)
+    ..type = AddressType.values[data['type'] as int];
 }
 
 /// A person's name, both formatted version and individual name components.
+@HiveType(typeId: 4)
 class PersonName {
   /// Gets first name.
   ///
   /// Returns null if not available.
-  final String? first;
+  @HiveField(0)
+  String? first;
 
   /// Gets middle name.
   ///
   /// Returns null if not available.
-  final String? middle;
+  @HiveField(1)
+  String? middle;
 
   /// Gets last name.
   ///
   /// Returns null if not available.
-  final String? last;
+  @HiveField(2)
+  String? last;
 
   /// Gets prefix of the name.
   ///
   /// Returns null if not available.
-  final String? prefix;
+  @HiveField(3)
+  String? prefix;
 
   /// Gets suffix of the person's name.
   ///
   /// Returns null if not available.
-  final String? suffix;
+  @HiveField(4)
+  String? suffix;
 
   /// Gets the properly formatted name.
   ///
   /// Returns null if not available.
-  final String? formattedName;
+  @HiveField(5)
+  String? formattedName;
 
   /// Designates a text string to be set as the kana name in the phonebook. Used for Japanese contacts.
   ///
   /// Returns null if not available.
-  final String? pronunciation;
+  @HiveField(6)
+  String? pronunciation;
+}
 
+extension PersonNameExtension on PersonName {
   /// Create a [PersonName] from native data.
-  PersonName.fromNative(Map data)
-      : first = data['first'] as String?,
-        middle = data['middle'] as String?,
-        last = data['last'] as String?,
-        prefix = data['prefix'] as String?,
-        suffix = data['suffix'] as String?,
-        formattedName = data['formattedName'] as String?,
-        pronunciation = data['pronunciation'] as String?;
+  PersonName fromNative(Map data) => PersonName()
+    ..first = data['first'] as String?
+    ..middle = data['middle'] as String?
+    ..last = data['last'] as String?
+    ..prefix = data['prefix'] as String?
+    ..suffix = data['suffix'] as String?
+    ..formattedName = data['formattedName'] as String?
+    ..pronunciation = data['pronunciation'] as String?;
 }
 
 /// A driver license or ID card.
+@HiveType(typeId: 5)
 class DriverLicense {
   /// Gets city of holder's address.
   ///
   /// Returns null if not available.
-  final String? addressCity;
+  @HiveField(0)
+  String? addressCity;
 
   /// Gets state of holder's address.
   ///
   /// Returns null if not available.
-  final String? addressState;
+  @HiveField(1)
+  String? addressState;
 
   /// Gets holder's street address.
   ///
   /// Returns null if not available.
-  final String? addressStreet;
+  @HiveField(2)
+  String? addressStreet;
 
   /// Gets postal code of holder's address.
   ///
   /// Returns null if not available.
-  final String? addressZip;
+  @HiveField(3)
+  String? addressZip;
 
   /// Gets birth date of the holder.
   ///
   /// Returns null if not available.
-  final String? birthDate;
+  @HiveField(4)
+  String? birthDate;
 
   /// Gets "DL" for driver licenses, "ID" for ID cards.
   ///
   /// Returns null if not available.
-  final String? documentType;
+  @HiveField(5)
+  String? documentType;
 
   /// Gets expiry date of the license.
   ///
   /// Returns null if not available.
-  final String? expiryDate;
+  @HiveField(6)
+  String? expiryDate;
 
   /// Gets holder's first name.
   ///
   /// Returns null if not available.
-  final String? firstName;
+  @HiveField(7)
+  String? firstName;
 
   /// Gets holder's gender. 1 - male, 2 - female.
   ///
   /// Returns null if not available.
-  final String? gender;
+  @HiveField(8)
+  String? gender;
 
   /// Gets issue date of the license.
   ///
   /// The date format depends on the issuing country. MMDDYYYY for the US, YYYYMMDD for Canada.
   ///
   /// Returns null if not available.
-  final String? issueDate;
+  @HiveField(9)
+  String? issueDate;
 
   /// Gets the three-letter country code in which DL/ID was issued.
   ///
   /// Returns null if not available.
-  final String? issuingCountry;
+  @HiveField(10)
+  String? issuingCountry;
 
   /// Gets holder's last name.
   ///
   /// Returns null if not available.
-  final String? lastName;
+  @HiveField(11)
+  String? lastName;
 
   /// Gets driver license ID number.
   ///
   /// Returns null if not available.
-  final String? licenseNumber;
+  @HiveField(12)
+  String? licenseNumber;
 
   /// Gets holder's middle name.
   ///
   /// Returns null if not available.
-  final String? middleName;
+  @HiveField(13)
+  String? middleName;
+}
 
+extension DriverLicenseExtension on DriverLicense {
   /// Create a [DriverLicense] from native data.
-  DriverLicense.fromNative(Map data)
-      : addressCity = data['addressCity'] as String?,
-        addressState = data['addressState'] as String?,
-        addressStreet = data['addressStreet'] as String?,
-        addressZip = data['addressZip'] as String?,
-        birthDate = data['birthDate'] as String?,
-        documentType = data['documentType'] as String?,
-        expiryDate = data['expiryDate'] as String?,
-        firstName = data['firstName'] as String?,
-        gender = data['gender'] as String?,
-        issueDate = data['issueDate'] as String?,
-        issuingCountry = data['issuingCountry'] as String?,
-        lastName = data['lastName'] as String?,
-        licenseNumber = data['licenseNumber'] as String?,
-        middleName = data['middleName'] as String?;
+  DriverLicense fromNative(Map data) => DriverLicense()
+    ..addressCity = data['addressCity'] as String?
+    ..addressState = data['addressState'] as String?
+    ..addressStreet = data['addressStreet'] as String?
+    ..addressZip = data['addressZip'] as String?
+    ..birthDate = data['birthDate'] as String?
+    ..documentType = data['documentType'] as String?
+    ..expiryDate = data['expiryDate'] as String?
+    ..firstName = data['firstName'] as String?
+    ..gender = data['gender'] as String?
+    ..issueDate = data['issueDate'] as String?
+    ..issuingCountry = data['issuingCountry'] as String?
+    ..lastName = data['lastName'] as String?
+    ..licenseNumber = data['licenseNumber'] as String?
+    ..middleName = data['middleName'] as String?;
 }
 
 /// An email message from a 'MAILTO:' or similar QRCode type.
+@HiveType(typeId: 6)
 class Email {
   /// Gets email's address.
   ///
   /// Returns null if not available.
-  final String? address;
+  @HiveField(0)
+  String? address;
 
   /// Gets email's body.
   ///
   /// Returns null if not available.
-  final String? body;
+  @HiveField(1)
+  String? body;
 
   /// Gets email's subject.
   ///
   /// Returns null if not available.
-  final String? subject;
+  @HiveField(2)
+  String? subject;
 
   /// Gets type of the email.
   ///
   /// See also [EmailType].
   /// Returns null if not available.
-  final EmailType? type;
+  @HiveField(3)
+  EmailType? type;
+}
 
+extension EmailExtension on Email {
   /// Create a [Email] from native data.
-  Email.fromNative(Map data)
-      : address = data['address'] as String?,
-        body = data['body'] as String?,
-        subject = data['subject'] as String?,
-        type = EmailType.values[data['type'] as int];
+  Email fromNative(Map data) => Email()
+    ..address = data['address'] as String?
+    ..body = data['body'] as String?
+    ..subject = data['subject'] as String?
+    ..type = EmailType.values[data['type'] as int];
 }
 
 /// GPS coordinates from a 'GEO:' or similar QRCode type.
+@HiveType(typeId: 7)
 class GeoPoint {
   /// Gets the latitude.
-  final double? latitude;
+  @HiveField(0)
+  double? latitude;
 
   /// Gets the longitude.
-  final double? longitude;
+  @HiveField(1)
+  double? longitude;
+}
 
+extension GeoPointExtension on GeoPoint {
   /// Create a [GeoPoint] from native data.
-  GeoPoint.fromNative(Map data)
-      : latitude = data['latitude'] as double?,
-        longitude = data['longitude'] as double?;
+  GeoPoint fromNative(Map data) => GeoPoint()
+    ..latitude = data['latitude'] as double?
+    ..longitude = data['longitude'] as double?;
 }
 
 /// Phone number info.
+@HiveType(typeId: 8)
 class Phone {
   /// Gets phone number.
   ///
   /// Returns null if not available.
-  final String? number;
+  @HiveField(0)
+  String? number;
 
   /// Gets type of the phone number.
   ///
   /// See also [PhoneType].
   /// Returns null if not available.
-  final PhoneType? type;
+  @HiveField(1)
+  PhoneType? type;
+}
 
+extension PhoneExtension on Phone {
   /// Create a [Phone] from native data.
-  Phone.fromNative(Map data)
-      : number = data['number'] as String?,
-        type = PhoneType.values[data['type'] as int];
+  Phone fromNative(Map data) => Phone()
+    ..number = data['number'] as String?
+    ..type = PhoneType.values[data['type'] as int];
 }
 
 /// A sms message from a 'SMS:' or similar QRCode type.
+@HiveType(typeId: 9)
 class SMS {
   /// Gets the message content of the sms.
   ///
   /// Returns null if not available.
-  final String? message;
+  @HiveField(0)
+  String? message;
 
   /// Gets the phone number of the sms.
   ///
   /// Returns null if not available.
-  final String? phoneNumber;
+  @HiveField(1)
+  String? phoneNumber;
+}
 
+extension SMSExtension on SMS {
   /// Create a [SMS] from native data.
-  SMS.fromNative(Map data)
-      : message = data['message'] as String?,
-        phoneNumber = data['phoneNumber'] as String?;
+  SMS fromNative(Map data) => SMS()
+    ..message = data['message'] as String?
+    ..phoneNumber = data['phoneNumber'] as String?;
 }
 
 /// A URL and title from a 'MEBKM:' or similar QRCode type.
+@HiveType(typeId: 10)
 class UrlBookmark {
   /// Gets the title of the bookmark.
   ///
   /// Returns null if not available.
-  final String? title;
+  @HiveField(0)
+  String? title;
 
   /// Gets the url of the bookmark.
   ///
   /// Returns null if not available.
-  final String? url;
+  @HiveField(1)
+  String? url;
+}
 
+extension UrlBookmarkExtension on UrlBookmark {
   /// Create a [UrlBookmark] from native data.
-  UrlBookmark.fromNative(Map data)
-      : title = data['title'] as String?,
-        url = data['url'] as String?;
+  UrlBookmark fromNative(Map data) => UrlBookmark()
+    ..title = data['title'] as String?
+    ..url = data['url'] as String?;
 }
 
 /// A wifi network parameters from a 'WIFI:' or similar QRCode type.
+@HiveType(typeId: 11)
 class WiFi {
   /// Gets the encryption type of the WIFI.
   ///
   /// See all [EncryptionType].
-  final EncryptionType encryptionType;
+  @HiveField(0)
+  EncryptionType? encryptionType;
 
   /// Gets the ssid of the WIFI.
   ///
   /// Returns null if not available.
-  final String? ssid;
+  @HiveField(1)
+  String? ssid;
 
   /// Gets the password of the WIFI.
   ///
   /// Returns null if not available.
-  final String? password;
-
-  /// Create a [WiFi] from native data.
-  WiFi.fromNative(Map data)
-      : encryptionType = EncryptionType.values[data['encryptionType'] as int],
-        ssid = data['ssid'] as String?,
-        password = data['password'] as String?;
+  @HiveField(2)
+  String? password;
 }
 
+extension WiFiExtension on WiFi {
+  /// Create a [WiFi] from native data.
+  WiFi fromNative(Map data) => WiFi()
+    ..encryptionType = EncryptionType.values[data['encryptionType'] as int]
+    ..ssid = data['ssid'] as String?
+    ..password = data['password'] as String?;
+}
+
+@HiveType(typeId: 12)
 enum BarcodeFormat {
   /// Barcode format unknown to the current SDK.
   ///
   /// Constant Value: -1
+  @HiveField(0)
   unknown,
 
   /// Barcode format constant representing the union of all supported formats.
   ///
   /// Constant Value: 0
+  @HiveField(1)
   all,
 
   /// Barcode format constant for Code 128.
   ///
   /// Constant Value: 1
+  @HiveField(2)
   code128,
 
   /// Barcode format constant for Code 39.
   ///
   /// Constant Value: 2
+  @HiveField(3)
   code39,
 
   /// Barcode format constant for Code 93.
   ///
   /// Constant Value: 4
+  @HiveField(4)
   code93,
 
   /// Barcode format constant for Codabar.
   ///
   /// Constant Value: 8
+  @HiveField(5)
   codebar,
 
   /// Barcode format constant for Data Matrix.
   ///
   /// Constant Value: 16
+  @HiveField(6)
   dataMatrix,
 
   /// Barcode format constant for EAN-13.
   ///
   /// Constant Value: 32
+  @HiveField(7)
   ean13,
 
   /// Barcode format constant for EAN-8.
   ///
   /// Constant Value: 64
+  @HiveField(8)
   ean8,
 
   /// Barcode format constant for ITF (Interleaved Two-of-Five).
   ///
   /// Constant Value: 128
+  @HiveField(9)
   itf,
 
   /// Barcode format constant for QR Code.
   ///
   /// Constant Value: 256
+  @HiveField(10)
   qrCode,
 
   /// Barcode format constant for UPC-A.
   ///
   /// Constant Value: 512
+  @HiveField(11)
   upcA,
 
   /// Barcode format constant for UPC-E.
   ///
   /// Constant Value: 1024
+  @HiveField(12)
   upcE,
 
   /// Barcode format constant for PDF-417.
   ///
   /// Constant Value: 2048
+  @HiveField(13)
   pdf417,
 
   /// Barcode format constant for AZTEC.
   ///
   /// Constant Value: 4096
+  @HiveField(14)
   aztec,
 }
 
@@ -616,156 +707,189 @@ extension BarcodeValue on BarcodeFormat {
 }
 
 /// Address type constants.
+@HiveType(typeId: 13)
 enum AddressType {
   /// Unknown address type.
   ///
   /// Constant Value: 0
+  @HiveField(0)
   unknown,
 
   /// Work address.
   ///
   /// Constant Value: 1
+  @HiveField(1)
   work,
 
   /// Home address.
   ///
   /// Constant Value: 2
+  @HiveField(2)
   home,
 }
 
 /// Barcode value type constants
+@HiveType(typeId: 14)
 enum BarcodeType {
   /// Barcode value type unknown, which indicates the current version of SDK cannot recognize the structure of the barcode. Developers can inspect the raw value instead.
   ///
   /// Constant Value: 0
+  @HiveField(0)
   unknown,
 
   /// Barcode value type constant for contact information.
   ///
   /// Constant Value: 1
+  @HiveField(1)
   contactInfo,
 
   /// Barcode value type constant for email message details.
   ///
   /// Constant Value: 2
+  @HiveField(2)
   email,
 
   /// Barcode value type constant for ISBNs.
   ///
   /// Constant Value: 3
+  @HiveField(3)
   isbn,
 
   /// Barcode value type constant for phone numbers.
   ///
   /// Constant Value: 4
+  @HiveField(4)
   phone,
 
   /// Barcode value type constant for product codes.
   ///
   /// Constant Value: 5
+  @HiveField(5)
   product,
 
   /// Barcode value type constant for SMS details.
   ///
   /// Constant Value: 6
+  @HiveField(6)
   sms,
 
   /// Barcode value type constant for plain text.
   ///
   ///Constant Value: 7
+  @HiveField(7)
   text,
 
   /// Barcode value type constant for URLs/bookmarks.
   ///
   /// Constant Value: 8
+  @HiveField(8)
   url,
 
   /// Barcode value type constant for WiFi access point details.
   ///
   /// Constant Value: 9
+  @HiveField(9)
   wifi,
 
   /// Barcode value type constant for geographic coordinates.
   ///
   /// Constant Value: 10
+  @HiveField(10)
   geo,
 
   /// Barcode value type constant for calendar events.
   ///
   /// Constant Value: 11
+  @HiveField(11)
   calendarEvent,
 
   /// Barcode value type constant for driver's license data.
   ///
   /// Constant Value: 12
+  @HiveField(12)
   driverLicense,
 }
 
 /// Email format type constants.
+@HiveType(typeId: 15)
 enum EmailType {
   /// Unknown email type.
   ///
   /// Constant Value: 0
+  @HiveField(0)
   unknown,
 
   /// Work email.
   ///
   /// Constant Value: 1
+  @HiveField(1)
   work,
 
   /// Home email.
   ///
   /// Constant Value: 2
+  @HiveField(2)
   home,
 }
 
 /// Phone number format type constants.
+@HiveType(typeId: 16)
 enum PhoneType {
   /// Unknown phone type.
   ///
   /// Constant Value: 0
+  @HiveField(0)
   unknown,
 
   /// Work phone.
   ///
   /// Constant Value: 1
+  @HiveField(1)
   work,
 
   /// Home phone.
   ///
   /// Constant Value: 2
+  @HiveField(2)
   home,
 
   /// Fax machine.
   ///
   /// Constant Value: 3
+  @HiveField(3)
   fax,
 
   /// Mobile phone.
   ///
   /// Constant Value: 4
+  @HiveField(4)
   mobile,
 }
 
 /// Wifi encryption type constants.
+@HiveType(typeId: 17)
 enum EncryptionType {
   /// Unknown encryption type.
   ///
   /// Constant Value: 0
+  @HiveField(0)
   none,
 
   /// Not encrypted.
   ///
   /// Constant Value: 1
+  @HiveField(1)
   open,
 
   /// WPA level encryption.
   ///
   /// Constant Value: 2
+  @HiveField(2)
   wpa,
 
   /// WEP level encryption.
   ///
   /// Constant Value: 3
+  @HiveField(3)
   wep,
 }
