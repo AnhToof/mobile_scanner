@@ -14,6 +14,10 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
+import android.graphics.ImageFormat
+import android.graphics.Rect
+import android.graphics.YuvImage
+import android.media.Image
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
@@ -23,6 +27,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry
 import io.flutter.view.TextureRegistry
+import java.io.ByteArrayOutputStream
 import java.io.File
 
 
@@ -108,15 +113,30 @@ class MobileScanner(private val activity: Activity, private val textureRegistry:
                 scanner.process(inputImage)
                         .addOnSuccessListener { barcodes ->
                             for (barcode in barcodes) {
-                                val event = mapOf("name" to "barcode", "data" to barcode.data)
+                                val event = mapOf("name" to "barcode", "data" to barcode.data, "image" to mediaImage.toByteArray())
                                 sink?.success(event)
                             }
                         }
                         .addOnFailureListener { e -> Log.e(TAG, e.message, e) }
                         .addOnCompleteListener { imageProxy.close() }
-//            }
-//            else -> imageProxy.close()
-//        }
+    }
+
+    private fun Image.toByteArray(): ByteArray {
+        val yBuffer = planes[0].buffer // Y
+        val vuBuffer = planes[2].buffer // VU
+
+        val ySize = yBuffer.remaining()
+        val vuSize = vuBuffer.remaining()
+
+        val nv21 = ByteArray(ySize + vuSize)
+
+        yBuffer.get(nv21, 0, ySize)
+        vuBuffer.get(nv21, ySize, vuSize)
+
+        val yuvImage = YuvImage(nv21, ImageFormat.NV21, this.width, this.height, null)
+        val out = ByteArrayOutputStream()
+        yuvImage.compressToJpeg(Rect(0, 0, yuvImage.width, yuvImage.height), 50, out)
+        return out.toByteArray()
     }
 
 
